@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Assignment2 - Chao Chen</title>
+
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <link rel="stylesheet" href="css/stylesheet.css">
+
+  </head>
+  <body>
+  <div class="container" id="root">
+    <h1>Time Log</h1>
+
+   <div class="col-sm-2">
+     <label for="project">Project <span class="glyphicon"> + </span></label>
+     <div>
+
+      <input type="text" id="project" v-model="newProject" v-text="aProject.name">
+
+      <div class="popdown">
+       <button @click="addProject(newProject)" class="btn-success">Create a new project</button>
+
+        <div v-for="(project, index) in projects">
+             <button  :id = "'projectId'+index"  @click="findProject(project.name,index)" class="btn-info">{{project.name}}</button>
+             <button  value="Delete" class="delete btn-danger" @click="deleteProject(index)">
+            <span class="glyphicon glyphicon-remove-sign" aria-hidden="true"></span>
+             </button>
+        </div>
+     </div>
+
+
+       </div>
+
+     <label for="phase">Phase</label>
+     <input type="text" id="phase" v-model="newPhase" required>
+
+     <label for="date">Date</label>
+     <input type="date" id="date" v-model="newDate" >
+
+     <label for="start">Start Time</label>
+     <input type="time" id="start" v-model="newStart" >
+
+     <label for="intTime">Int Time</label>
+     <input type="number" id="intTime" v-model="newIntTime" >
+
+     <label for="stop">Stop Time</label>
+     <input type="time" id="stop" v-model="newStop" >
+
+     <label for="delta">Delta Time</label>
+     <p>{{delta}}<p>
+
+     <label for="comments">Comments</label>
+     <input type="text" id="comments" v-model="newComments" >
+
+
+     <button @click="addTimelog" class="btn-success">Add</button>
+     <button @click="saveToStorage" class="btn-success">save</button>
+     <button @click="loadFromStorage" class="btn-success">load</button>
+
+     <!-- <body onload="startTime()"> -->
+
+
+
+  <div>
+     <button class="circle btn btn-primary" @click="startButton()" v-show="sButton">Start</button>
+     <button class="circle btn btn-primary" @click="pauseButton()" v-show="pButton">Pause</button>
+     <button class="circle btn btn-primary" @click="restartButton()" v-show="rButton">Restart</button>
+     <button class="circle btn btn-primary" @click="stopButton()" v-show="stButton">Stop</button>
+  </div>
+
+
+
+     <input type="file" @change="onFileChange" >
+
+
+
+
+
+
+  </div>
+  <div id="txt"></div>
+  <div>
+    <div class="leftcolumn">Set Alarm:</div>
+    <input type="number" min="0" max="23" id="alarmH"></input> Hour
+    <input type="number" min="0" max="59" id="alarmM"></input> Minutes
+    <input type="number" min="0" max="59" id="alarmS"></input> Seconds
+  </div>
+
+
+<div class="col-sm-10" v-if="aProject.show">
+
+  <h2>{{aProject.name}}</h2>
+
+    <div>
+
+      <table class="table table-hover" >
+        <tr>
+           <th>Phase</th>
+           <th>Date</th>
+           <th>Start Time</th>
+           <th>Int Time</th>
+           <th>Stop Time</th>
+           <th>Delta Time</th>
+           <th>Comments</th>
+           <th>Editting</th>
+        </tr>
+
+
+
+          <tr v-for="(onePhase, index) in aProject.allPhases">
+               <th>
+                  <div  v-if="onePhase.show">{{onePhase.name}}</div>
+                  <input size="7" v-else v-model="onePhase.name"></input>
+               </th>
+               <td>
+                  <div v-if="onePhase.show">{{onePhase.date}}</div>
+                  <input size="10" v-else v-model="onePhase.date"></input>
+               </td>
+
+              <td>
+                <div v-if="onePhase.show">{{onePhase.start}}</div>
+                <input size="8" v-else v-model="onePhase.start"></input>
+              </td>
+
+              <td>
+                <div v-if="onePhase.show">{{onePhase.intTime}}</div>
+                <input size="8" v-else v-model="onePhase.intTime"></input>
+              </td>
+
+              <td>
+                <div v-if="onePhase.show">{{onePhase.stop}}</div>
+                <input size="8" v-else v-model="onePhase.stop"></input>
+              </td>
+
+              <td>
+                 <div v-if="onePhase.show">{{onePhase.deltaTime}}</div>
+                <input size="8" v-else v-model="onePhase.deltaTime"></input></td>
+              <td>
+                <div v-if="onePhase.show">{{onePhase.comments}}</div>
+                <input size="8" v-else v-model="onePhase.comments"></input>
+              </td>
+
+              <td>
+                  <button v-if="onePhase.show" value="Edit" class="edit btn btn-primary" @click="edit_row(onePhase)">
+                  <span class="glyphicon glyphicon-pencil" aria-hidden="true"></span>
+                  </button>
+                  <button   v-else value="Save" class="save btn btn-success" @click="save_row(onePhase)">
+                  <span class="glyphicon glyphicon-ok-sign" aria-hidden="true"></span>
+                  </button>
+                  <button  value="Delete" class="delete btn btn-danger" @click="delete_row(index)">
+                    <span class="glyphicon glyphicon-remove" aria-hidden="true"></span>
+                  </button>
+              </td>
+          </tr>
+
+
+
+      </table>
+
+
+
+    <div class="sumAndAverage">
+
+
+      <!-- Large modal -->
+      <button @click="aProject.calculateAll()" type="button" class="btn btn-primary" data-toggle="modal" data-target=".bs-example-modal-lg">Calculate Int Time</button>
+
+      <div class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel">
+        <div class="modal-dialog modal-lg" role="document">
+          <div class="modal-content" style="padding: 1em">
+            <h4>Sum Time</h4>
+            <div v-if="aProject.SumInt">
+              <p>Sum values of Interrupting time: {{aProject.SumInt}} minutes</p>
+              <p>Average values of Interrupting time: {{aProject.AveInt}} minutes</p>
+            </div>
+
+            <h4>Delta Time</h4>
+              <div v-if="aProject.SumDelta">
+                <p>Sum values of Delta time: {{aProject.SumDelta}} minutes</p>
+                <p>Average values of Delta time: {{aProject.AveDelta}} minutes</p>
+              </div>
+            <h4>Correlation coefficient of Interrupting time and Delta Time</h4>
+              <div v-if="aProject.correlation">
+                <p> {{aProject.correlation}} </p>
+
+              </div>
+          </div>
+        </div>
+      </div>
+
+
+    </div>
+
+
+  </div>
+
+
+    </div>
+
+   </div> <!-- container -->
+
+
+
+   </div>
+  <script src="https://unpkg.com/vue"></script>
+
+  <script src="js/timedisplay.js"></script>
+
+  <script src="js/phase.js"></script>
+  <script src="js/project.js"></script>
+
+
+   <script src="js/main.js"></script>
+  </body>
+</html>
+
+
+
